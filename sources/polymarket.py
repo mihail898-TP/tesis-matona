@@ -88,6 +88,10 @@ def _libro(token_id: str) -> dict:
 
 
 RE_PERIODO = re.compile(r"\b(1h|2h|1q|2q|3q|4q|half|quarter|1st|2nd|3rd|4th|first|second)\b", re.I)
+# Mercados que no son la línea del partido completo: margen exacto, carreras
+# a X puntos, etc. Se excluyen de spread y total.
+RE_NO_PRINCIPAL = re.compile(r"margin|race to|first to|odd|even", re.I)
+EQUIPOS_NBA = set(common.NBA_ALIAS.values())
 
 
 def _principales(markets: list, home: str, away: str) -> list:
@@ -108,6 +112,12 @@ def _principales(markets: list, home: str, away: str) -> list:
             outs = {common.team_key(o) for o in _jload(m.get("outcomes"), [])}
             if outs == equipos:
                 ml.append(m)
+            continue
+        # Solo la línea del partido completo: el spread del primer cuarto o
+        # el total del primer tiempo pueden quedar más cerca de 50/50 que la
+        # línea del partido y colarse como "principal".
+        texto = " ".join(filter(None, [etiqueta, m.get("slug")]))
+        if RE_PERIODO.search(texto) or RE_NO_PRINCIPAL.search(texto):
             continue
         precios = _jload(m.get("outcomePrices"), [])
         p = common.num(precios[0]) if precios else None
@@ -142,7 +152,7 @@ def fetch(storage_ts: str) -> list[dict]:
     # Los partidos lejanos y los futuros cambian poco: se capturan solo en la
     # corrida que cae en el primer cuarto de hora de cada bloque de N horas.
     horaria = (ahora.minute < 15 and ahora.hour % config.LEJOS_CADA_HORAS == 0)
-    n_lejos = 0
+    n_lejos = n_otros = 0
     eventos = []
     for pagina in range(config.POLY_PAGINAS):
         d = common.get_json(f"{config.GAMMA_BASE}/events", params={
@@ -175,6 +185,11 @@ def fetch(storage_ts: str) -> list[dict]:
 
         if es_partido:
             home, away = mm.group(2).strip(), mm.group(1).strip()
+            # "X vs Y" también calza en eventos que no son partidos ("Exact
+            # Margin", etc.). Solo cuentan si ambos lados son equipos NBA.
+            if not {common.team_key(home), common.team_key(away)} <= EQUIPOS_NBA:
+                n_otros += 1
+                continue
             # startDate del evento es cuándo se ABRIÓ el mercado, que en los
             # partidos de la NBA ocurre una semana antes. Para la fecha real
             # del partido el orden de preferencia es:
@@ -298,7 +313,7 @@ def fetch(storage_ts: str) -> list[dict]:
 
     print(f"  [polymarket] {len(filas)} filas "
           f"({n_part} partidos, {n_fut} futuros, {len(eventos)} eventos, "
-          f"{n_libros} libros, {n_lejos} lejanos omitidos"
+          f"{n_libros} libros, {n_lejos} lejanos omitidos, {n_otros} no-partidos omitidos"
           f"{', corrida completa' if horaria else ''})")
     if origenes:
         print("    fecha tomada de: " +
