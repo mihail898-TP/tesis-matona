@@ -19,6 +19,7 @@ Se capturan dos clases de mercado:
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 import re
 
@@ -86,7 +87,45 @@ def _libro(token_id: str) -> dict:
     }
 
 
+def _principales(markets: list) -> list:
+    """Deja todos los moneyline y, de spread y total, solo la línea principal:
+    la más cercana a 50/50. Polymarket publica decenas de líneas alternativas
+    por partido (over 210.5, 211.5, 212.5...), que eran el 80% de las filas
+    y llenaban la base en un día."""
+    mejores: dict[str, tuple] = {}
+    salida = []
+    for m in markets:
+        etiqueta = " ".join(filter(None, [m.get("groupItemTitle"), m.get("question")]))
+        tipo = _clasificar(etiqueta)
+        if tipo == "moneyline":
+            salida.append(m)
+            continue
+        precios = _jload(m.get("outcomePrices"), [])
+        p = common.num(precios[0]) if precios else None
+        if p is None:
+            continue
+        dist = abs(p - 0.5)
+        if tipo not in mejores or dist < mejores[tipo][0]:
+            mejores[tipo] = (dist, m)
+    return salida + [m for _, m in mejores.values()]
+
+
+def _horas_hasta(ini, ahora) -> float | None:
+    try:
+        d = dt.datetime.fromisoformat(str(ini).replace("Z", "+00:00"))
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=dt.timezone.utc)
+        return (d - ahora).total_seconds() / 3600
+    except (TypeError, ValueError):
+        return None
+
+
 def fetch(storage_ts: str) -> list[dict]:
+    ahora = dt.datetime.fromisoformat(storage_ts)
+    # Los partidos lejanos y los futuros cambian poco: se capturan solo en la
+    # corrida que cae en el primer cuarto de hora de cada bloque de N horas.
+    horaria = (ahora.minute < 15 and ahora.hour % config.LEJOS_CADA_HORAS == 0)
+    n_lejos = 0
     eventos = []
     for pagina in range(config.POLY_PAGINAS):
         d = common.get_json(f"{config.GAMMA_BASE}/events", params={
@@ -113,6 +152,8 @@ def fetch(storage_ts: str) -> list[dict]:
         es_partido = bool(mm)
 
         if not es_partido and not _es_futuro_util(ev_slug):
+            continue
+        if not es_partido and not horaria:
             continue
 
         if es_partido:
@@ -144,6 +185,14 @@ def fetch(storage_ts: str) -> list[dict]:
                 muestra.append((ev_slug[:40], origen, fecha,
                                 str(ev.get("startDate"))[:10],
                                 str(fin)[:10], str(gst)[:10]))
+            # Cerca = empieza dentro de CERCA_HORAS o empezó hace poco (en
+            # juego). Sin hora legible se trata como cercano: mejor guardar
+            # de más que perder un partido.
+            h = _horas_hasta(ini, ahora)
+            cerca = h is None or -6 <= h <= config.CERCA_HORAS
+            if not cerca and not horaria:
+                n_lejos += 1
+                continue
             ekey = common.event_key(config.LEAGUE, ini, home, away, fecha=fecha)
             n_part += 1
         else:
@@ -152,7 +201,10 @@ def fetch(storage_ts: str) -> list[dict]:
             ekey = f"futures|{ev_slug}"
             n_fut += 1
 
-        for m in ev.get("markets") or []:
+        mercados = ev.get("markets") or []
+        if es_partido:
+            mercados = _principales(mercados)
+        for m in mercados:
             # El slug queda fuera a propósito (ver _clasificar).
             etiqueta = " ".join(filter(None, [
                 m.get("groupItemTitle"), m.get("question")]))
@@ -173,7 +225,7 @@ def fetch(storage_ts: str) -> list[dict]:
             # agotar el presupuesto. El libro del token NO es el espejo del
             # YES, así que con uno basta.
             lb = {}
-            if es_partido and presupuesto > 0:
+            if es_partido and cerca and presupuesto > 0:
                 toks = _jload(m.get("clobTokenIds"), [])
                 if toks:
                     lb = _libro(toks[0])
@@ -229,7 +281,8 @@ def fetch(storage_ts: str) -> list[dict]:
 
     print(f"  [polymarket] {len(filas)} filas "
           f"({n_part} partidos, {n_fut} futuros, {len(eventos)} eventos, "
-          f"{n_libros} libros)")
+          f"{n_libros} libros, {n_lejos} lejanos omitidos"
+          f"{', corrida completa' if horaria else ''})")
     if origenes:
         print("    fecha tomada de: " +
               ", ".join(f"{k}={v}" for k, v in origenes.items()))
