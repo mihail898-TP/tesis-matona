@@ -53,6 +53,13 @@ POLY_DEPTH = os.getenv("POLY_DEPTH", "1") not in ("0", "false", "False")
 POLY_DEPTH_NIVELES = int(os.getenv("POLY_DEPTH_NIVELES", "5"))
 POLY_DEPTH_MAX = int(os.getenv("POLY_DEPTH_MAX", "150"))
 
+# Ventana de captura fina. Los partidos que empiezan dentro de CERCA_HORAS se
+# capturan en cada corrida (cada 15 min). Los más lejanos y los futuros, solo
+# una vez cada LEJOS_CADA_HORAS horas: cambian poco y eran la mayor parte del
+# volumen de la base.
+CERCA_HORAS = float(os.getenv("CERCA_HORAS", "48"))
+LEJOS_CADA_HORAS = int(os.getenv("LEJOS_CADA_HORAS", "3"))
+
 # --- Almacenamiento --------------------------------------------------------
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 CSV_DIR = os.getenv("CSV_DIR", "data")
