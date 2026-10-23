@@ -2,7 +2,9 @@ name: captura
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    # Minutos desfasados del :00/:15/:30/:45: en esos GitHub descarta corridas
+    # programadas por exceso de carga.
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
 
 concurrency:
