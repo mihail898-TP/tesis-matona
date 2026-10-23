@@ -1,0 +1,185 @@
+======================================================================
+KALSHI — series: ['KXNBAGAME']
+======================================================================
+  4 mercados devueltos. Primeros dos completos:
+
+{
+  "can_close_early": true,
+  "close_time": "2026-10-09T23:00:00Z",
+  "created_time": "2026-09-30T23:59:54.324957Z",
+  "custom_strike": {
+    "basketball_team": "29e3c04e-fadb-4006-be20-cbb8c159ce0e"
+  },
+  "early_close_condition": "This market will close and expire after a winner is declared.",
+  "event_ticker": "KXNBAGAME-26OCT07MININD",
+  "exchange_index": 3,
+  "expected_expiration_time": "2026-10-08T02:00:00Z",
+  "expiration_time": "2026-10-09T23:00:00Z",
+  "expiration_value": "",
+  "last_price_dollars": "0.7000",
+  "latest_expiration_time": "2026-10-09T23:00:00Z",
+  "market_type": "binary",
+  "no_ask_dollars": "0.5900",
+  "no_bid_dollars": "0.2800",
+  "no_sub_title": "Minnesota",
+  "notional_value_dollars": "1.0000",
+  "occurrence_datetime": "2026-10-08T02:00:00Z",
+  "open_interest_fp": "38.44",
+  "open_time": "2026-10-01T00:04:17.696087Z",
+  "previous_price_dollars": "0.0000",
+  "previous_yes_ask_dollars": "0.8600",
+  "previous_yes_bid_dollars": "0.1400",
+  "price_level_structure": "linear_cent",
+  "price_ranges": [
+    {
+      "end": "1.0000",
+      "start": "0.0000",
+      "step": "0.0100"
+    }
+  ],
+  "result": "",
+  "rules_primary": "If Minnesota wins the Minnesota vs Indiana Pro Basketball game originally scheduled for Oct 7, 2026, then the market resolves to Yes.",
+  "rules_secondary": "If the game is postponed but begins within 48 hours of its originally scheduled
+  ...(cortado)
+--------------------------------------------------
+{
+  "can_close_early": true,
+  "close_time": "2026-10-09T23:00:00Z",
+  "created_time": "2026-09-30T23:59:54.324957Z",
+  "custom_strike": {
+    "basketball_team": "d059bab2-9fb5-42dd-8038-5a12474300ce"
+  },
+  "early_close_condition": "This market will close and expire after a winner is declared.",
+  "event_ticker": "KXNBAGAME-26OCT07MININD",
+  "exchange_index": 3,
+  "expected_expiration_time": "2026-10-08T02:00:00Z",
+  "expiration_time": "2026-10-09T23:00:00Z",
+  "expiration_value": "",
+  "last_price_dollars": "0.6100",
+  "latest_expiration_time": "2026-10-09T23:00:00Z",
+  "market_type": "binary",
+  "no_ask_dollars": "0.7100",
+  "no_bid_dollars": "0.4000",
+  "no_sub_title": "Indiana",
+  "notional_value_dollars": "1.0000",
+  "occurrence_datetime": "2026-10-08T02:00:00Z",
+  "open_interest_fp": "55.84",
+  "open_time": "2026-10-01T00:04:17.696087Z",
+  "previous_price_dollars": "0.0000",
+  "previous_yes_ask_dollars": "0.8600",
+  "previous_yes_bid_dollars": "0.1400",
+  "price_level_structure": "linear_cent",
+  "price_ranges": [
+    {
+      "end": "1.0000",
+      "start": "0.0000",
+      "step": "0.0100"
+    }
+  ],
+  "result": "",
+  "rules_primary": "If Indiana wins the Minnesota vs Indiana Pro Basketball game originally scheduled for Oct 7, 2026, then the market resolves to Yes.",
+  "rules_secondary": "If the game is postponed but begins within 48 hours of its originally scheduled sta
+  ...(cortado)
+--------------------------------------------------
+
+  Tickers y títulos de los 4 primeros:
+   ticker : KXNBAGAME-26OCT07MININD-MIN
+   event  : KXNBAGAME-26OCT07MININD
+   title  : Minnesota wins
+   yes_sub: Minnesota
+   bid/ask: None None | last: None | vol: None
+
+   ticker : KXNBAGAME-26OCT07MININD-IND
+   event  : KXNBAGAME-26OCT07MININD
+   title  : Indiana wins
+   yes_sub: Indiana
+   bid/ask: None None | last: None | vol: None
+
+   ticker : KXNBAGAME-26OCT06LALGSW-LAL
+   event  : KXNBAGAME-26OCT06LALGSW
+   title  : Los Angeles L wins
+   yes_sub: Los Angeles L
+   bid/ask: None None | last: None | vol: None
+
+   ticker : KXNBAGAME-26OCT06LALGSW-GSW
+   event  : KXNBAGAME-26OCT06LALGSW
+   title  : Golden State wins
+   yes_sub: Golden State
+   bid/ask: None None | last: None | vol: None
+
+
+======================================================================
+POLYMARKET — probando varias formas de encontrar la NBA
+======================================================================
+
+--- markets tag_slug=nba: 5 resultados
+   question/title: Xi Jinping out before 2027?
+   slug          : xi-jinping-out-before-2027
+   gameStartTime : None
+   outcomes      : ["Yes", "No"]
+   clobTokenIds  : ["32338220190071351435772801779725302244575775216413325951443816017994629993401", "2565931
+   volumeNum     : 14297809.368800994
+
+   question/title: Will Gavin Newsom win the 2028 Democratic presidential nomination?
+   slug          : will-gavin-newsom-win-the-2028-democratic-presidential-nomination-568
+   gameStartTime : None
+   outcomes      : ["Yes", "No"]
+   clobTokenIds  : ["54533043819946592547517511176940999955633860128497669742211153063842200957669", "8785417
+   volumeNum     : 27832687.842320982
+
+   question/title: Will Alexandria Ocasio-Cortez win the 2028 Democratic presidential nomination?
+   slug          : will-alexandria-ocasio-cortez-win-the-2028-democratic-presidential-nomination-653
+   gameStartTime : None
+   outcomes      : ["Yes", "No"]
+   clobTokenIds  : ["107064985435494333113391038470401719113272800530429703182710416066774068907304", "651760
+   volumeNum     : 15375220.980774995
+
+
+--- events tag_slug=nba: 5 resultados
+   question/title: Will LeBron James retire before next NBA season?
+   slug          : will-lebron-james-retire-before-next-nba-season
+   gameStartTime : None
+   outcomes      : None
+   clobTokenIds  : None
+   volumeNum     : None
+
+   question/title: NBA: Stephen Curry to leave Warriors?
+   slug          : nba-stephen-curry-to-leave-warriors
+   gameStartTime : None
+   outcomes      : None
+   clobTokenIds  : None
+   volumeNum     : None
+
+   question/title: NBA: 2027 Champion
+   slug          : nba-2027-champion
+   gameStartTime : None
+   outcomes      : None
+   clobTokenIds  : None
+   volumeNum     : None
+
+
+--- markets sin tag: 5 resultados
+   question/title: Xi Jinping out before 2027?
+   slug          : xi-jinping-out-before-2027
+   gameStartTime : None
+   outcomes      : ["Yes", "No"]
+   clobTokenIds  : ["32338220190071351435772801779725302244575775216413325951443816017994629993401", "2565931
+   volumeNum     : 14297809.368800994
+
+   question/title: Will Gavin Newsom win the 2028 Democratic presidential nomination?
+   slug          : will-gavin-newsom-win-the-2028-democratic-presidential-nomination-568
+   gameStartTime : None
+   outcomes      : ["Yes", "No"]
+   clobTokenIds  : ["54533043819946592547517511176940999955633860128497669742211153063842200957669", "8785417
+   volumeNum     : 27832687.842320982
+
+   question/title: Will Alexandria Ocasio-Cortez win the 2028 Democratic presidential nomination?
+   slug          : will-alexandria-ocasio-cortez-win-the-2028-democratic-presidential-nomination-653
+   gameStartTime : None
+   outcomes      : ["Yes", "No"]
+   clobTokenIds  : ["107064985435494333113391038470401719113272800530429703182710416066774068907304", "651760
+   volumeNum     : 15375220.980774995
+
+
+--- Estructura completa del primer mercado (markets sin tag):
+   claves disponibles: ['acceptingOrders', 'acceptingOrdersTimestamp', 'active', 'approved', 'archived', 'automaticallyActive', 'bestAsk', 'bestBid', 'clearBookOnStart', 'clobRewards', 'clobTokenIds', 'closed', 'comboStatus', 'competitive', 'conditionId', 'createdAt', 'customLiveness', 'cyom', 'deploying', 'deployingTimestamp', 'description', 'enableOrderBook', 'endDate', 'endDateIso', 'events', 'featured', 'feeSchedule', 'feeType', 'feesEnabled', 'funded', 'groupItemThreshold', 'groupItemTitle', 'hasReviewedDates', 'holdingRewardsEnabled', 'icon', 'id', 'image', 'lastTradePrice', 'liquidity', 'liquidityClob', 'liquidityNum', 'makerBaseFee', 'manualActivation', 'marketMakerAddress', 'negRisk', 'negRiskOther', 'negRiskRequestID', 'new', 'oneDayPriceChange', 'oneMonthPriceChange', 'oneWeekPriceChange', 'oneYearPriceChange', 'orderMinSize', 'orderPriceMinTickSize', 'outcomePrices', 'outcomes', 'pagerDutyNotificationEnabled', 'pendingDeployment', 'positionIds', 'question', 'questionID', 'ready', 'resolutionSource', 'resolvedBy', 'restricted', 'rewardsMaxSpread', 'rewardsMinSize', 'rfqEnabled', 'slug', 'spread', 'startDate', 'startDateIso', 'submitted_by', 'takerBaseFee', 'umaBond', 'umaResolutionStatuses', 'umaReward', 'updatedAt', 'version', 'volume', 'volume1mo', 'volume1moClob', 'volume1wk', 'volume1wkClob', 'volume1yr', 'volume1yrClob', 'volume24hr', 'volume24hrClob', 'volumeClob', 'volumeNum']
