@@ -61,12 +61,30 @@ class Storage:
         return self._pg(filas) if self.conn else self._csv(filas)
 
     def _pg(self, filas):
+        from psycopg2.extras import execute_values  # noqa: PLC0415
+
         cols = ",".join(CAMPOS)
-        ph = ",".join(["%s"] * len(CAMPOS))
-        sql = f"insert into captures ({cols}) values ({ph})"
-        datos = [tuple(f.get(c) for c in CAMPOS) for f in filas]
+        # Polymarket a veces entrega dos mercados que caen en la misma llave
+        # (mismo partido, tipo, línea y equipo). Se guarda el primero y se
+        # ignora el repetido en vez de abortar toda la captura.
+        sql = (f"insert into captures ({cols}) values %s "
+               "on conflict do nothing")
+        vistos, datos = set(), []
+        for f in filas:
+            llave = (f.get("captured_at"), f.get("source"), f.get("book") or "",
+                     f.get("event_key"), f.get("market_type") or "",
+                     f.get("line") if f.get("line") is not None else -999,
+                     f.get("outcome") or "")
+            if llave in vistos:
+                continue
+            vistos.add(llave)
+            datos.append(tuple(f.get(c) for c in CAMPOS))
+        if len(datos) < len(filas):
+            print(f"  [storage] {len(filas) - len(datos)} filas repetidas omitidas")
         with self.conn.cursor() as cur:
-            cur.executemany(sql, datos)
+            # execute_values manda las filas en lotes: miles de filas en
+            # segundos en vez de minutos.
+            execute_values(cur, sql, datos, page_size=500)
         return len(datos)
 
     def _csv(self, filas):
