@@ -1,10 +1,8 @@
 name: captura
 
 on:
-  schedule:
-    # Minutos desfasados del :00/:15/:30/:45: en esos GitHub descarta corridas
-    # programadas por exceso de carga.
-    - cron: "7,22,37,52 * * * *"
+  # Sin horario propio: el programador de GitHub no disparaba las corridas.
+  # Las lanza cron-job.org cada 15 minutos vía la API (workflow_dispatch).
   workflow_dispatch:
 
 concurrency:
