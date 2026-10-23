@@ -87,18 +87,27 @@ def _libro(token_id: str) -> dict:
     }
 
 
-def _principales(markets: list) -> list:
+RE_PERIODO = re.compile(r"\b(1h|2h|1q|2q|3q|4q|half|quarter|1st|2nd|3rd|4th|first|second)\b", re.I)
+
+
+def _principales(markets: list, home: str, away: str) -> list:
     """Deja todos los moneyline y, de spread y total, solo la línea principal:
     la más cercana a 50/50. Polymarket publica decenas de líneas alternativas
     por partido (over 210.5, 211.5, 212.5...), que eran el 80% de las filas
     y llenaban la base en un día."""
+    equipos = {common.team_key(home), common.team_key(away)}
     mejores: dict[str, tuple] = {}
-    salida = []
+    ml = []
     for m in markets:
         etiqueta = " ".join(filter(None, [m.get("groupItemTitle"), m.get("question")]))
         tipo = _clasificar(etiqueta)
         if tipo == "moneyline":
-            salida.append(m)
+            # Moneyline de verdad = los dos resultados son los dos equipos.
+            # Así quedan fuera las apuestas de jugador (Sí/No), que caían
+            # aquí por descarte.
+            outs = {common.team_key(o) for o in _jload(m.get("outcomes"), [])}
+            if outs == equipos:
+                ml.append(m)
             continue
         precios = _jload(m.get("outcomePrices"), [])
         p = common.num(precios[0]) if precios else None
@@ -107,7 +116,15 @@ def _principales(markets: list) -> list:
         dist = abs(p - 0.5)
         if tipo not in mejores or dist < mejores[tipo][0]:
             mejores[tipo] = (dist, m)
-    return salida + [m for _, m in mejores.values()]
+    # Si hay varios (partido completo, primer tiempo, primer cuarto...), se
+    # prefiere el que no menciona un período y, entre esos, el de más volumen,
+    # que es siempre el del partido completo.
+    if ml:
+        ml.sort(key=lambda m: (bool(RE_PERIODO.search(
+            " ".join(filter(None, [m.get("groupItemTitle"), m.get("question"), m.get("slug")])))),
+            -(common.num(m.get("volumeNum")) or 0)))
+        ml = ml[:1]
+    return ml + [m for _, m in mejores.values()]
 
 
 def _horas_hasta(ini, ahora) -> float | None:
@@ -203,7 +220,7 @@ def fetch(storage_ts: str) -> list[dict]:
 
         mercados = ev.get("markets") or []
         if es_partido:
-            mercados = _principales(mercados)
+            mercados = _principales(mercados, home, away)
         for m in mercados:
             # El slug queda fuera a propósito (ver _clasificar).
             etiqueta = " ".join(filter(None, [
