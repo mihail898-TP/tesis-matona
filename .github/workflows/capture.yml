@@ -1,0 +1,35 @@
+name: captura
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: captura
+  cancel-in-progress: false
+
+jobs:
+  capturar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Capturar
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          LEAGUE: basketball_nba
+          ODDS_REGIONS: us,eu
+          BOOKS_FILTER: pinnacle,draftkings,fanduel,betmgm
+          KALSHI_SERIES: KXNBAGAME
+          POLY_TAG: nba
+        run: python capture.py
