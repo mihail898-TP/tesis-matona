@@ -17,8 +17,12 @@ ODDS_API_BASE = "https://api.the-odds-api.com/v4"
 # Línea de dinero en las dos regiones: la europea es la que trae Pinnacle.
 ODDS_REGIONS_H2H = os.getenv("ODDS_REGIONS_H2H", "us,eu")
 # Spread y total solo en la estadounidense. Dejar vacío para no pedirlos.
-ODDS_EXTRA_MARKETS = os.getenv("ODDS_EXTRA_MARKETS", "spreads,totals")
+# Vacío por defecto: con el plan gratis no alcanzan los créditos.
+ODDS_EXTRA_MARKETS = os.getenv("ODDS_EXTRA_MARKETS", "")
 ODDS_REGIONS_EXTRA = os.getenv("ODDS_REGIONS_EXTRA", "us")
+# Cada cuántas horas se consulta (ver sources/odds_api.py). Con 3 y solo línea
+# de dinero en dos regiones se gastan ~496 de los 500 créditos gratis al mes.
+ODDS_CADA_HORAS = int(os.getenv("ODDS_CADA_HORAS", "3"))
 
 # Casas que interesan. Lista vacía = guardar todas las que devuelva la API.
 BOOKS_FILTER = [b for b in os.getenv(

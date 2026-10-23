@@ -8,9 +8,16 @@ Se hacen dos llamadas separadas para controlar el gasto:
      que es la referencia de la literatura por su bajo margen)
   2. spread y total solo en us -> 2 créditos
 Total 4 por captura, unos 11.500 al mes con capturas cada 15 minutos.
+
+Con el plan gratis (500 créditos al mes) se usa solo la línea de dinero y
+una vez cada ODDS_CADA_HORAS horas: 2 créditos x 8 corridas x 31 días = 496.
+Sirve para verificar el emparejamiento en vivo; la serie fina de las casas se
+baja al final desde el histórico de la API (plan pago, un solo mes).
 Los headers x-requests-remaining / x-requests-used informan el saldo.
 """
 from __future__ import annotations
+
+import datetime as dt
 
 import common
 import config
@@ -75,6 +82,11 @@ def _pedir(markets: str, regions: str, storage_ts: str) -> list[dict]:
 def fetch(storage_ts: str) -> list[dict]:
     if not config.ODDS_API_KEY:
         print("  [odds_api] sin ODDS_API_KEY, se omite")
+        return []
+
+    ahora = dt.datetime.fromisoformat(storage_ts)
+    if not (ahora.minute < 15 and ahora.hour % config.ODDS_CADA_HORAS == 0):
+        print(f"  [odds_api] fuera de horario (cada {config.ODDS_CADA_HORAS} h), se omite")
         return []
 
     filas = _pedir("h2h", config.ODDS_REGIONS_H2H, storage_ts)
