@@ -92,6 +92,17 @@ RE_PERIODO = re.compile(r"\b(1h|2h|1q|2q|3q|4q|half|quarter|1st|2nd|3rd|4th|firs
 # a X puntos, etc. Se excluyen de spread y total.
 RE_NO_PRINCIPAL = re.compile(r"margin|race to|first to|odd|even", re.I)
 EQUIPOS_NBA = set(common.NBA_ALIAS.values())
+# Apuestas de jugador ("Isaiah Hartenstein: Assists O/U 2.5"): también se
+# clasifican como total o spread, y su línea puede quedar más cerca de 50/50
+# que la del partido.
+RE_JUGADOR = re.compile(
+    r"\b(rebounds?|assists?|threes|3-pointers?|steals?|blocks?|turnovers?|"
+    r"double-double|triple-double|player)\b", re.I)
+# "points" no va en la lista: el total del partido puede llamarse "Total
+# Points". A las apuestas de puntos de jugador las frenan TOTAL_MIN (su línea
+# es baja) y la exigencia de que el spread nombre a un equipo.
+TOTAL_MIN = 150     # un total de partido NBA nunca baja de esto
+SPREAD_MAX = 30     # ni un spread de partido sube de esto
 
 
 def _principales(markets: list, home: str, away: str) -> list:
@@ -117,8 +128,19 @@ def _principales(markets: list, home: str, away: str) -> list:
         # el total del primer tiempo pueden quedar más cerca de 50/50 que la
         # línea del partido y colarse como "principal".
         texto = " ".join(filter(None, [etiqueta, m.get("slug")]))
-        if RE_PERIODO.search(texto) or RE_NO_PRINCIPAL.search(texto):
+        if (RE_PERIODO.search(texto) or RE_NO_PRINCIPAL.search(texto)
+                or RE_JUGADOR.search(texto)):
             continue
+        g = RE_LINEA.search(m.get("groupItemTitle") or m.get("question") or "")
+        linea = float(g.group(1)) if g else None
+        if linea is None:
+            continue
+        if tipo == "total" and linea < TOTAL_MIN:
+            continue
+        if tipo == "spread":
+            nombres = common.slug(texto)
+            if abs(linea) > SPREAD_MAX or not any(e in nombres for e in equipos):
+                continue
         precios = _jload(m.get("outcomePrices"), [])
         p = common.num(precios[0]) if precios else None
         if p is None:
