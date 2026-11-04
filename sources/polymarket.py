@@ -47,7 +47,9 @@ def _clasificar(texto: str) -> str:
     t = (texto or "").lower()
     if "spread" in t or re.search(r"[+-]\d{1,2}(\.\d)?(\s|$)", t):
         return "spread"
-    if any(k in t for k in ("total", "over", "under", "o/u")):
+    # Con límite de palabra: "under" va dentro de "Thunder" y mandaba el
+    # moneyline de todos los partidos de OKC a "total" (se perdían).
+    if re.search(r"\b(total|over|under)\b|o/u", t):
         return "total"
     return "moneyline"
 
