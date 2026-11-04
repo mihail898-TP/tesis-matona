@@ -79,8 +79,12 @@ def fetch(storage_ts: str) -> list[dict]:
                 "event_key": common.event_key(
                     config.LEAGUE, None, t1, t2, fecha=fecha),
                 "source_event_id": m.get("ticker"),
-                "commence_time": m.get("occurrence_datetime")
-                                 or m.get("expected_expiration_time"),
+                # Kalshi no publica la hora de inicio: occurrence_datetime y
+                # expected_expiration_time son el cierre esperado (~2h50
+                # después del salto). capture.py la completa con la hora de
+                # Polymarket u Odds API del mismo partido; la de Kalshi queda
+                # en raw.
+                "commence_time": None,
                 "home_team": t2,     # en el ticker el segundo es el local
                 "away_team": t1,
                 "outcome": yes_team,
@@ -93,6 +97,8 @@ def fetch(storage_ts: str) -> list[dict]:
                 "raw": {"last": last,
                         "open_interest": m.get("open_interest_fp"),
                         "event_ticker": m.get("event_ticker"),
+                        "expiracion_esperada": m.get("occurrence_datetime")
+                                               or m.get("expected_expiration_time"),
                         "title": m.get("title")},
             })
     extra = f" ({sin_parsear} sin parsear)" if sin_parsear else ""

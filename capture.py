@@ -19,6 +19,26 @@ FUENTES = [
 ]
 
 
+def completar_inicio(filas: list[dict]) -> None:
+    """Kalshi no trae la hora de inicio. Se toma la más temprana que reporten
+    las otras fuentes para el mismo partido en esta corrida (Odds API suele ir
+    unos minutos atrasada respecto de Polymarket). Si ninguna lo trae, queda
+    vacía: mejor nula que equivocada."""
+    inicio: dict[str, str] = {}
+    for f in filas:
+        ct, ek = f.get("commence_time"), f["event_key"]
+        if ct and f["source"] != "kalshi" and not ek.startswith("futures|"):
+            if ek not in inicio or common.iso_cmp(ct) < common.iso_cmp(inicio[ek]):
+                inicio[ek] = ct
+    k = [f for f in filas if f["source"] == "kalshi"]
+    for f in k:
+        if not f.get("commence_time"):
+            f["commence_time"] = inicio.get(f["event_key"])
+    if k:
+        n = sum(1 for f in k if f["commence_time"])
+        print(f"  [kalshi] hora de inicio completada en {n} de {len(k)} filas")
+
+
 def main() -> int:
     dry = "--dry-run" in sys.argv
     ts = common.iso(common.now_utc())
@@ -32,6 +52,8 @@ def main() -> int:
             # Una fuente caída no debe tumbar la captura de las otras.
             errores.append(f"{nombre}: {e}")
             traceback.print_exc()
+
+    completar_inicio(filas)
 
     # Cuántos partidos quedaron con más de una fuente: es el indicador de
     # salud del emparejamiento. Si es 0 de forma persistente, los alias de

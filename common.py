@@ -63,6 +63,19 @@ def num(x) -> float | None:
         return None
 
 
+def iso_cmp(ts_iso) -> dt.datetime:
+    """Convierte una marca de tiempo en texto a datetime UTC para compararla.
+    Las fuentes usan formatos distintos ('...Z', '+00:00', con espacio)."""
+    try:
+        s = str(ts_iso).strip().replace("Z", "+00:00").replace(" ", "T", 1)
+        if s.endswith("+00"):
+            s += ":00"
+        d = dt.datetime.fromisoformat(s)
+        return d if d.tzinfo else d.replace(tzinfo=dt.timezone.utc)
+    except (TypeError, ValueError):
+        return dt.datetime.max.replace(tzinfo=dt.timezone.utc)
+
+
 def fecha_et(ts_iso: str | None) -> str:
     """Fecha del partido en hora del este de EE.UU., formato YYYY-MM-DD."""
     if not ts_iso:
